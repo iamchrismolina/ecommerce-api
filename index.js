@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import express from "express";
 import Stripe from "stripe";
 import cors from "cors";
+import corsOptions from "./config/corsOptions.js";
 import mongoose from "mongoose";
 import Product from "./model/Product.js";
 
@@ -10,26 +11,6 @@ dotenv.config();
 const app = express();
 // To allow reading of JSON Data that's sent to this server
 app.use(express.json());
-
-const corsOptions = {
-  origin: ["https://dksuperstore.vercel.app"],
-  methods: "GET,HEAD,PUT,OPTIONS,POST,DELETE",
-  allowedHeaders: [
-    "Access-Control-Allow-Headers",
-    "Origin",
-    "X-Requested-With",
-    "Content-Type",
-    "Accept",
-    "Authorization",
-    "token",
-    "Access-Control-Request-Method",
-    "Access-Control-Request-Headers",
-    "Access-Control-Allow-Credentials",
-  ],
-  credentials: true,
-  preflightContinue: false,
-  optionsSuccessStatus: 204,
-};
 
 app.use(cors(corsOptions));
 
@@ -46,10 +27,12 @@ const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY, {
   apiVersion: "2023-10-16",
 });
 
+app.get("/", (req, res) => {
+  res.send("Hello Word!");
+});
+
 app.get("/storedata", async (req, res) => {
-  console.log(corsOptions);
   const products = await Product.find();
-  console.log(products);
   res.json(`This is StoreData: ${products}`);
 });
 
@@ -85,10 +68,6 @@ app.post("/create-checkout-session", async (req, res) => {
       error: err?.message ?? "An unexpected error occured",
     });
   }
-});
-
-app.get("/", (req, res) => {
-  res.send("Hello Word!");
 });
 
 const PORT = process.env.PORT || 5500;
