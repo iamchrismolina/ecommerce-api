@@ -2,6 +2,8 @@ import dotenv from "dotenv";
 import express from "express";
 import Stripe from "stripe";
 import cors from "cors";
+import mongoose from "mongoose";
+import Product from "./model/Product.js";
 
 dotenv.config();
 
@@ -31,22 +33,35 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+mongoose
+  .connect(process.env.DATABASE_URL || 5001)
+  .then(() => {
+    console.log("Connected to MongoDb");
+  })
+  .catch((err) => {
+    console.log(err);
+  });
+
 const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY, {
   apiVersion: "2023-10-16",
 });
 
-app.get("/storedata", (req, res) => {
-  res.json("Storedata is Here, Present!");
+app.get("/storedata", async (req, res) => {
+  const products = await Product.find();
+  console.log(products);
+  res.json(`This is StoreData: ${products}`);
 });
 
 app.post("/create-checkout-session", async (req, res) => {
+  const dbStoreItems = await Product.find();
+  if (!dbStoreItems) return res.status(204).json("No Products Found");
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
       line_items: req.body.itemDetails.map((item) => {
         const matchedStoreItem = dbStoreItems.find(
-          (dbStoreItem) => dbStoreItem.id === item.id
+          (dbStoreItem) => dbStoreItem.productId === item.id
         );
         return {
           price_data: {
