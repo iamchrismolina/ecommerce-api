@@ -12,7 +12,7 @@ const app = express();
 app.use(express.json());
 
 const corsOptions = {
-  origin: [`${process.env.CLIENT_URL}`],
+  origin: [`${process.env.CLIENT_URL}`, "https://dksuperstore.vercel.app/"],
   methods: "GET,HEAD,PUT,OPTIONS,POST,DELETE",
   allowedHeaders: [
     "Access-Control-Allow-Headers",
