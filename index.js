@@ -12,7 +12,7 @@ const app = express();
 app.use(express.json());
 
 const corsOptions = {
-  origin: ["https://dksuperstore.vercel.app/"],
+  origin: ["https://dksuperstore.vercel.app"],
   methods: "GET,HEAD,PUT,OPTIONS,POST,DELETE",
   allowedHeaders: [
     "Access-Control-Allow-Headers",
@@ -30,7 +30,7 @@ const corsOptions = {
   preflightContinue: false,
   optionsSuccessStatus: 204,
 };
-console.log(corsOptions);
+
 app.use(cors(corsOptions));
 
 mongoose
@@ -47,6 +47,7 @@ const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY, {
 });
 
 app.get("/storedata", async (req, res) => {
+  console.log(corsOptions);
   const products = await Product.find();
   console.log(products);
   res.json(`This is StoreData: ${products}`);
